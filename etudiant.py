@@ -1,10 +1,18 @@
-etudiants = dict()
+'''etudiants = dict()
+filieres = dict()
+
+def ajout_filiere():
+    print("\nAjout Filière :\n")
+    nom = str(input("Entrer le nom de la filière"))
+    n_place = int(input(f"Entrer le nombre de place de {nom}"))
+    filieres.update({nom: {"nombre_place": n_place, "etudiants": None}})
+
 
 def ajout_etudiant():
     print("\nEtudiants :")
-    nom = str(input("Entrer le nom d'etudiant:\t"))
-    prenom = str(input("Entrer le prenom d'etudiant:\t"))
-    n_modules = int(input("Entrer le nombre de modules:\t"))
+    nom = str(input("Entrer le nom d'etudiant:\t")) or "Sirri"
+    prenom = str(input("Entrer le prenom d'etudiant:\t")) or "Sirri"
+    n_modules = int(input("Entrer le nombre de modules:\t"))  or 1
 
     #Modules
     modules_e = dict()
@@ -80,8 +88,142 @@ def main():
             affichage_etudiant()
         elif choix == 3:
             moyenne_note()
-        else:
+        elif choix == 4:
+            ajout_filiere()
+            print(filieres)
+        else :
             print("Au revoir cher(e) utilisateur")
             return
 
+main()'''
+
+# Fichier (info + moyenne + mention + classement)
+
+note_moyenne = []
+
+class Etudiant:#Self pointeur
+    def __init__(self):
+        self.filename = "files/Etudiants.txt"
+        self.nom = ''
+        self.prenom = ''
+        self.age = 0
+        self.cni = ''
+        self.filiere = ''
+        self.etudiants = dict()
+        self.modules = dict()
+        self.moyenne = 0
+        self.mention = ''
+        self.classement = 1
+
+    def ajouter_Etudiant(self):
+        self.nom = str(input("Entrer le nom d'etudiant:\t")).upper() or ''
+        self.prenom = str(input("Entrer le prenom d'etudiant:\t")).capitalize() or ''
+        self.age = int(input("Entrer l'age d'etudiant:\t")) or 0
+        self.cni = str(input("Entrer la cni d'etudiant:\t"))
+        self.filiere = str(input("Entrer la filière d'etudiant:\t"))
+
+        self.ajouter_modules(int(input("Entrer le nombre de modules d'etudiant:\t")))
+
+        self.etudiants.update({
+            self.nom.upper() + " " + self.prenom.capitalize() : {
+                "Nom": self.nom.upper(),
+                "Prenom": self.prenom.capitalize(),
+                "Age": str(self.age),
+                "CNI": self.cni,
+                "Filiere": self.filiere,
+                "Modules": self.modules
+            }
+        })
+
+        string = ''
+        for etudiant, elements in self.etudiants.items():
+            string += "-"*26
+            string += "\n|" + etudiant + "\n"
+            for key in elements:
+                if key != "Modules":
+                    string += "| -" + key + ":" + elements[key] + "\n"
+                else:
+                    string += f"| {'Modules':<10} | {'Notes':<10}" + "|\n"
+                    string += "-"*26
+                    for module in elements[key]:
+                        string += f"\n| {module:<10} | {elements[key][module]:<10}" + "|\n"
+                        string += "-" * 26
+
+        self.calculer_moyenne_mention()
+
+        string += f"\n| {'Moyenne':<10} | {self.moyenne:<10} |\n"
+        string += f"\n| {'Mention':<10} | {self.mention:<10} |\n"
+        string += "-" * 26
+        string += f"\n| {'Classement':<10} | {self.classement:<10} |\n"
+
+        file = open(self.filename, "a", encoding="utf-8")
+        file.write(string)
+        file.close()
+
+    def ajouter_modules(self, nombre):
+        for i in range(1, nombre+1):
+            nom_m = str(input(f"Entrer le nom du {i} module:\t"))
+            note_m = float(input(f"Entrer la nom de {nom_m}:\t"))
+            self.modules.update({
+                nom_m: note_m
+            })
+        return
+
+    def calculer_moyenne_mention(self):
+        c = 0
+        for module, note in self.modules.items():
+            c+=1
+            self.moyenne+= note
+
+        self.moyenne/=c
+        note_moyenne.append(self.moyenne)
+
+        print("notemoyenne ", note_moyenne)
+        if self.moyenne<10:
+            self.mention = "Ajournée"
+        elif self.moyenne<12 and self.moyenne>=10:
+            self.mention = "Passable"
+        elif self.moyenne>=12 and self.moyenne<14:
+            self.mention = "A bien"
+        elif self.moyenne>14 and self.moyenne<16:
+            self.mention = "Bien"
+        elif self.moyenne<18 and self.moyenne>=16:
+            self.mention = "Tres bien"
+        else:
+            self.mention = "Excellent"
+
+        self.calculer_classement()
+    
+    def calculer_classement(self):
+        n = sorted(note_moyenne, reverse=True)
+        self.classement = n.index(self.moyenne) + 1
+        return self.classement
+    
+    def afficher_Eleves(self):
+        print("\n")
+        for etudiant, elements in self.etudiants.items():
+            print("-"*28)
+            print("|", etudiant)
+            for key in elements:
+                #if key != "Modules":
+                print("|", key, ":", elements[key], end="\n")
+
+def main():
+    print("Bienvenue dans le logiciel de Management des etudiants")
+
+    choix = -1
+
+    while choix !=0:
+        etu = Etudiant()
+        choix = int(input("\nVeuillez choisir d'après ces choix\n[1] + Ajout d'un etudiant\n[2] + Affichage des etudiants\n[3] + Affichage de Moyenne Generale\n\n[0] - Quiter\n\n[RESULTAT] "))
+        if choix == 1:
+            print(choix)
+            etu.ajouter_Etudiant()
+        elif choix == 2:
+            etu.afficher_Eleves()
+        elif choix == 3:
+            print(note_moyenne)
+        else :
+            print("Au revoir cher(e) utilisateur")
+            
 main()
