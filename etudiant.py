@@ -195,8 +195,8 @@ class Etudiant:#Self pointeur
         self.calculer_classement()
     
     def calculer_classement(self):
-        n = sorted(note_moyenne, reverse=True)
-        self.classement = n.index(self.moyenne) + 1
+        note_moyenne.sort(reverse=True)
+        self.classement = note_moyenne.index(self.moyenne) + 1
         return self.classement
     
     def afficher_Eleves(self):
